@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .status {
+            font-weight: bold;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket连接测试</h1>
+    
+    <div class="container">
+        <h2>连接设置</h2>
+        <label>JWT令牌: <input type="text" id="token" size="50" placeholder="请输入JWT令牌"></label><br>
+        <button onclick="connect()">连接WebSocket</button>
+        <button onclick="disconnect()">断开连接</button>
+        <button onclick="sendHeartbeat()">发送心跳</button>
+    </div>
+    
+    <div class="container">
+        <h2>发送消息</h2>
+        <textarea id="message" rows="3" cols="50" placeholder="输入要发送的消息"></textarea><br>
+        <button onclick="sendMessage()">发送消息</button>
+    </div>
+    
+    <div class="container">
+        <h2>消息记录</h2>
+        <div id="messages"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        
+        function connect() {
+            const token = document.getElementById('token').value;
+            if (!token) {
+                addMessage('请输入JWT令牌', 'error');
+                return;
+            }
+            
+            if (ws) {
+                ws.close();
+            }
+            
+            ws = new WebSocket(`ws://localhost:3002?token=${token}`);
+            
+            ws.onopen = () => {
+                addMessage('✅ WebSocket连接成功', 'success');
+            };
+            
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                addMessage(`📨 收到消息: ${JSON.stringify(message)}`, 'info');
+                
+                // 根据消息类型进行不同处理
+                switch (message.type) {
+                    case 'connection_ack':
+                        addMessage(`✅ 连接确认: ${message.data.message}`, 'success');
+                        break;
+                    case 'user_online':
+                        addMessage(`👤 用户上线: ${message.data.userId}`, 'info');
+                        break;
+                    case 'echo':
+                        addMessage(`🔄 消息回显: ${JSON.stringify(message.data.originalMessage)}`, 'info');
+                        break;
+                    case 'heartbeat_ack':
+                        addMessage('💓 心跳响应', 'info');
+                        break;
+                }
+            };
+            
+            ws.onerror = (error) => {
+                addMessage(`❌ WebSocket连接错误: ${error.message}`, 'error');
+            };
+            
+            ws.onclose = (event) => {
+                addMessage(`🔚 WebSocket连接已关闭 (${event.code})`, 'info');
+            };
+        }
+        
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                addMessage('🔚 WebSocket连接已断开', 'info');
+            }
+        }
+        
+        function sendHeartbeat() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'heartbeat'
+                }));
+                addMessage('💓 发送心跳', 'info');
+            } else {
+                addMessage('❌ WebSocket未连接', 'error');
+            }
+        }
+        
+        function sendMessage() {
+            const messageText = document.getElementById('message').value;
+            if (!messageText) {
+                addMessage('请输入要发送的消息', 'error');
+                return;
+            }
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    type: 'custom_message',
+                    data: {
+                        text: messageText,
+                        timestamp: new Date().toISOString()
+                    }
+                };
+                
+                ws.send(JSON.stringify(message));
+                addMessage(`📤 发送消息: ${messageText}`, 'info');
+                document.getElementById('message').value = '';
+            } else {
+                addMessage('❌ WebSocket未连接', 'error');
+            }
+        }
+        
+        function addMessage(text, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        // 页面加载完成后提示用户
+        window.onload = () => {
+            addMessage('请在上方输入JWT令牌并点击"连接WebSocket"按钮开始测试', 'info');
+        };
+    </script>
+</body>
+</html>

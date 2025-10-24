@@ -1,0 +1,55 @@
+services:
+  # 数据库
+  postgres:
+    image: postgres:15
+    container_name: chat_postgres
+    environment:
+      POSTGRES_DB: chatapp
+      POSTGRES_USER: chatuser
+      POSTGRES_PASSWORD: mychatpassword123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # 后端服务
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chat_backend
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://chatuser:mychatpassword123@postgres:5432/chatapp?schema=public
+      - JWT_SECRET=my-super-secret-jwt-key-for-chat-app
+      - PORT=3007
+      - FRONTEND_URL=http://localhost:3000
+    ports:
+      - "3007:3007"  # 后端HTTP API端口
+      - "3001:3001"  # WebSocket端口
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend/uploads:/app/uploads  # 挂载上传文件目录
+    restart: unless-stopped
+
+  # 前端服务
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chat_frontend
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:3007
+      - NEXT_PUBLIC_WS_URL=ws://backend:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,105 @@
+// 数据库提供者
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户模型
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联消息
+  sentMessages    Message[] @relation("sentMessages")
+  receivedMessages Message[] @relation("receivedMessages")
+  
+  // 关联朋友圈
+  posts Post[] @relation("UserPosts")
+  likes Like[] @relation("UserLikes")
+  comments Comment[] @relation("UserComments")
+
+  @@map("users")
+}
+
+// 消息模型
+model Message {
+  id         String   @id @default(uuid())
+  content    String
+  status     String   @default("sending") // sending, sent, delivered, read
+  senderId   String
+  receiverId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // 关联用户
+  sender   User @relation("sentMessages", fields: [senderId], references: [id])
+  receiver User @relation("receivedMessages", fields: [receiverId], references: [id])
+
+  @@map("messages")
+}
+
+// 朋友圈帖子模型
+model Post {
+  id        String     @id @default(uuid())
+  content   String
+  images    String[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // 关联作者
+  author   User   @relation("UserPosts", fields: [authorId], references: [id])
+  authorId String
+
+  // 关联点赞和评论
+  likes    Like[]    @relation("PostLikes")
+  comments Comment[] @relation("PostComments")
+
+  @@map("posts")
+}
+
+// 点赞模型
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  // 关联用户和帖子
+  user   User @relation("UserLikes", fields: [userId], references: [id])
+  userId String
+  
+  post   Post @relation("PostLikes", fields: [postId], references: [id])
+  postId String
+
+  @@map("likes")
+}
+
+// 评论模型
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联作者
+  author   User   @relation("UserComments", fields: [authorId], references: [id])
+  authorId String
+
+  // 关联帖子
+  post   Post @relation("PostComments", fields: [postId], references: [id])
+  postId String
+
+  // 支持回复评论
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId  String?
+  replies   Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+}
