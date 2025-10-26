@@ -26,20 +26,15 @@ const nextConfig = {
   }
 }
 
-// 只有在非Vercel环境中才使用PWA
-if (process.env.VERCEL) {
-  module.exports = nextConfig;
-} else {
-  const withPWA = require('next-pwa')({
-    dest: 'public',
-    disable: process.env.NODE_ENV === 'development',
-    register: true,
-    skipWaiting: true,
-    // 华为设备优化
-    cacheStartUrl: true,
-    dynamicStartUrl: false,
-    dynamicStartUrlRedirect: '/',
-  });
-  
-  module.exports = withPWA(nextConfig);
-}
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+  // 华为设备优化
+  cacheStartUrl: true,
+  dynamicStartUrl: false,
+  dynamicStartUrlRedirect: '/',
+});
+
+module.exports = withPWA(nextConfig);
