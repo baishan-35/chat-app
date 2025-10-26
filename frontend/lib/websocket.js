@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-// WebSocket配置 - 从环境变量获取
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
+// WebSocket配置 - 使用相对路径以支持PWA
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || (typeof window !== 'undefined' ? (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host : '');
 const MAX_RECONNECT_ATTEMPTS = 3;
 const RECONNECT_INTERVAL = 3000; // 3秒
 
@@ -37,8 +37,17 @@ export function useWebSocket(token) {
     setError(null);
 
     try {
+      // 确定WebSocket URL
+      let wsUrl = WS_URL;
+      if (!wsUrl) {
+        // 如果没有配置环境变量，使用当前页面的协议和主机
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const host = window.location.host;
+        wsUrl = `${protocol}${host}`;
+      }
+      
       // 创建WebSocket连接
-      const ws = new WebSocket(`${WS_URL}?token=${token}`);
+      const ws = new WebSocket(`${wsUrl}/api/ws?token=${token}`);
       wsRef.current = ws;
 
       // 连接成功

@@ -1,7 +1,49 @@
 // 首页
+'use client';
+
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
+  useEffect(() => {
+    // 处理PWA安装提示
+    const handleBeforeInstallPrompt = (e: any) => {
+      // 阻止默认的安装提示
+      e.preventDefault();
+      // 保存事件以便稍后触发
+      setDeferredPrompt(e);
+      // 显示安装按钮
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      // 显示安装提示
+      deferredPrompt.prompt();
+      // 等待用户响应
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        // 清除保存的事件
+        setDeferredPrompt(null);
+        setShowInstallButton(false);
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <div className="max-w-md w-full text-center">
@@ -15,6 +57,15 @@ export default function Home() {
           >
             登录
           </Link>
+          
+          {showInstallButton && (
+            <button
+              onClick={handleInstallClick}
+              className="inline-block w-full py-3 px-6 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors duration-200"
+            >
+              安装应用
+            </button>
+          )}
           
           <div className="mt-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">功能特性</h2>
@@ -34,6 +85,14 @@ export default function Home() {
               <li className="flex items-center">
                 <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
                 响应式设计
+              </li>
+              <li className="flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                离线支持 (PWA)
+              </li>
+              <li className="flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                移动端优化
               </li>
             </ul>
           </div>

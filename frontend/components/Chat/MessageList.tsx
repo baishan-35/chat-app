@@ -15,11 +15,29 @@ interface Message {
   status: 'sending' | 'sent' | 'delivered' | 'read';
 }
 
+// 滑动删除相关类型
+interface SwipeState {
+  startX: number;
+  startY: number;
+  currentX: number;
+  isSwiping: boolean;
+  messageId: string | null;
+}
+
 export default function MessageList() {
-  const { messages } = useMessageStore();
+  const { messages, removeMessage } = useMessageStore();
   const { user } = useAuthStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [useVirtualization, setUseVirtualization] = useState(true); // 默认启用虚拟滚动
+  
+  // 滑动删除状态
+  const [swipeState, setSwipeState] = useState<SwipeState>({
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    isSwiping: false,
+    messageId: null
+  });
 
   // 监听WebSocket聊天消息
   useWebSocketChatMessage((message: any) => {
@@ -64,7 +82,7 @@ export default function MessageList() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+    <div className="flex-1 overflow-y-auto p-4 bg-gray-50 safe-area-inset-bottom">
       {/* 调试控制 */}
       <div className="mb-2 text-right">
         <button 
@@ -95,13 +113,66 @@ export default function MessageList() {
               className={`flex ${
                 message.senderId === user?.id ? 'justify-end' : 'justify-start'
               }`}
+              onTouchStart={(e) => {
+                if (message.senderId === user?.id) { // 只允许删除自己发送的消息
+                  const touch = e.touches[0];
+                  setSwipeState({
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    currentX: touch.clientX,
+                    isSwiping: true,
+                    messageId: message.id
+                  });
+                }
+              }}
+              onTouchMove={(e) => {
+                if (swipeState.isSwiping && swipeState.messageId === message.id) {
+                  const touch = e.touches[0];
+                  const deltaX = touch.clientX - swipeState.startX;
+                  const deltaY = touch.clientY - swipeState.startY;
+                                
+                  // 确保是水平滑动
+                  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    e.preventDefault();
+                    setSwipeState(prev => ({
+                      ...prev,
+                      currentX: touch.clientX
+                    }));
+                  }
+                }
+              }}
+              onTouchEnd={() => {
+                if (swipeState.isSwiping && swipeState.messageId === message.id) {
+                  const deltaX = swipeState.currentX - swipeState.startX;
+                                
+                  // 如果滑动距离超过阈值，则删除消息
+                  if (deltaX < -50) {
+                    removeMessage(message.id);
+                  }
+                                
+                  // 重置滑动状态
+                  setSwipeState({
+                    startX: 0,
+                    startY: 0,
+                    currentX: 0,
+                    isSwiping: false,
+                    messageId: null
+                  });
+                }
+              }}
             >
               <div
-                className={`max-w-xs md:max-w-md px-4 py-2 rounded-lg shadow-sm ${
+                className={`max-w-xs md:max-w-md px-4 py-2 rounded-lg shadow-sm message-bubble swipeable-item ${
                   message.senderId === user?.id
                     ? 'bg-indigo-500 text-white rounded-br-none'
                     : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                 }`}
+                style={{
+                  transform: swipeState.isSwiping && swipeState.messageId === message.id 
+                    ? `translateX(${swipeState.currentX - swipeState.startX}px)` 
+                    : 'translateX(0)',
+                  transition: swipeState.isSwiping ? 'none' : 'transform 0.3s ease'
+                }}
               >
                 {message.senderId !== user?.id && (
                   <div className="text-xs font-medium text-gray-600 mb-1">
@@ -109,7 +180,7 @@ export default function MessageList() {
                   </div>
                 )}
                 <div className="text-sm break-words">{message.content}</div>
-                <div className="flex items-center justify-end mt-1">
+                <div className="message-actions">
                   <span className="text-xs opacity-70">
                     {formatTime(message.timestamp)}
                   </span>

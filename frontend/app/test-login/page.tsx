@@ -24,6 +24,28 @@ export default function TestLoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      // 检查响应状态
+      if (!response.ok) {
+        setResult({
+          error: `HTTP错误: ${response.status}`,
+          status: response.status,
+          statusText: response.statusText
+        });
+        return;
+      }
+
+      // 检查响应内容类型
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        setResult({
+          error: "服务器返回非JSON响应",
+          contentType: contentType,
+          responseText: text
+        });
+        return;
+      }
+
       const data = await response.json();
       setResult(data);
 
@@ -39,7 +61,10 @@ export default function TestLoginPage() {
       }
     } catch (error: any) {
       console.error("登录错误:", error);
-      setResult({ error: error.message });
+      setResult({ 
+        error: error.message,
+        type: "network_error"
+      });
     } finally {
       setIsLoading(false);
     }

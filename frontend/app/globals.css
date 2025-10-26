@@ -26,3 +26,105 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* 华为手机安全区域适配 */
+@supports (padding: max(0px)) {
+  .safe-area-inset-bottom {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* 华为EMUI输入法适配 */
+.chat-input-container {
+  height: 60px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 触摸交互优化 */
+.touch-target {
+  /* 确保最小触摸区域为44x44px */
+  min-height: 44px;
+  min-width: 44px;
+  /* 增加触摸区域 */
+  padding: 4px;
+  margin: -4px;
+}
+
+/* 消息气泡触摸优化 */
+.message-bubble {
+  /* 增加点击区域 */
+  padding: 8px 12px;
+  margin: 4px 0;
+  /* 确保最小触摸区域 */
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 消息操作区域 */
+.message-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* 滑动操作容器 */
+.swipeable-item {
+  position: relative;
+  overflow: hidden;
+  /* 防止意外触摸 */
+  touch-action: pan-y;
+}
+
+/* 华为浏览器特有问题修复 */
+
+/* 输入框聚焦滚动修复 */
+.huawei-input-fix {
+  /* 防止输入框聚焦时页面跳动 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  /* 确保输入框在键盘弹出时正确位置 */
+  position: relative;
+  z-index: 10;
+}
+
+/* 视频/图片预览适配 */
+.media-preview {
+  /* 防止华为浏览器中媒体元素的渲染问题 */
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 300px;
+  /* 确保在华为浏览器中的正确显示 */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* 键盘弹出布局调整 */
+.keyboard-adjustment {
+  /* 使用flexible box防止布局塌陷 */
+  flex-shrink: 0;
+  /* 确保在键盘弹出时元素不会被压缩 */
+  min-height: 44px;
+}
+
+/* 华为浏览器兼容性修复 */
+.huawei-compat {
+  /* 解决华为浏览器中某些CSS属性不生效的问题 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  /* 防止渲染问题 */
+  will-change: transform;
+}
+
+/* 华为浏览器媒体查询 */
+@supports (-webkit-appearance: none) and (display: contents) {
+  .huawei-browser-fix {
+    /* 华为浏览器特定修复 */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}

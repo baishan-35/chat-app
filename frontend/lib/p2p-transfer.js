@@ -1,10 +1,16 @@
 // p2p-transfer.js
 // P2P文件传输库，支持WebRTC直连，失败时自动降级到服务器中转
 
+// 检查是否在浏览器环境中运行
+const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+
 class P2PTransfer {
   constructor() {
-    this.peerConnection = null;
-    this.dataChannel = null;
+    // 只在浏览器环境中初始化
+    if (isBrowser) {
+      this.peerConnection = null;
+      this.dataChannel = null;
+    }
     this.isSender = false;
     this.onProgress = null;
     this.onComplete = null;
@@ -13,6 +19,9 @@ class P2PTransfer {
 
   // 检查浏览器是否支持WebRTC
   isWebRTCSupported() {
+    // 只在浏览器环境中检查
+    if (!isBrowser) return false;
+    
     return !!(
       window.RTCPeerConnection &&
       window.RTCIceCandidate &&
@@ -22,6 +31,10 @@ class P2PTransfer {
 
   // 初始化发送方
   async initSender() {
+    if (!isBrowser) {
+      throw new Error('WebRTC only works in browser environment');
+    }
+    
     if (!this.isWebRTCSupported()) {
       throw new Error('浏览器不支持WebRTC');
     }
@@ -61,6 +74,10 @@ class P2PTransfer {
 
   // 初始化接收方
   async initReceiver(offer) {
+    if (!isBrowser) {
+      throw new Error('WebRTC only works in browser environment');
+    }
+    
     if (!this.isWebRTCSupported()) {
       throw new Error('浏览器不支持WebRTC');
     }
@@ -94,6 +111,8 @@ class P2PTransfer {
 
   // 设置数据通道事件
   setupDataChannelEvents() {
+    if (!isBrowser || !this.dataChannel) return;
+    
     this.dataChannel.onopen = () => {
       console.log('数据通道已打开');
     };
@@ -113,6 +132,11 @@ class P2PTransfer {
   // 发送文件
   sendFile(file) {
     return new Promise((resolve, reject) => {
+      if (!isBrowser) {
+        reject(new Error('File transfer only works in browser environment'));
+        return;
+      }
+      
       if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
         reject(new Error('数据通道未连接'));
         return;
@@ -203,6 +227,11 @@ class P2PTransfer {
   // 接收文件
   receiveFile() {
     return new Promise((resolve, reject) => {
+      if (!isBrowser) {
+        reject(new Error('File reception only works in browser environment'));
+        return;
+      }
+      
       if (!this.dataChannel) {
         reject(new Error('数据通道未初始化'));
         return;
@@ -267,25 +296,27 @@ class P2PTransfer {
 
   // 添加ICE候选
   addIceCandidate(candidate) {
-    if (this.peerConnection) {
+    if (isBrowser && this.peerConnection) {
       this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }
   }
 
   // 设置远程描述
   async setRemoteDescription(description) {
-    if (this.peerConnection) {
+    if (isBrowser && this.peerConnection) {
       await this.peerConnection.setRemoteDescription(new RTCSessionDescription(description));
     }
   }
 
   // 关闭连接
   close() {
-    if (this.dataChannel) {
-      this.dataChannel.close();
-    }
-    if (this.peerConnection) {
-      this.peerConnection.close();
+    if (isBrowser) {
+      if (this.dataChannel) {
+        this.dataChannel.close();
+      }
+      if (this.peerConnection) {
+        this.peerConnection.close();
+      }
     }
     this.dataChannel = null;
     this.peerConnection = null;
@@ -310,7 +341,10 @@ class P2PTransfer {
 // 自动降级的文件传输类
 class FileTransferManager {
   constructor() {
-    this.p2pTransfer = new P2PTransfer();
+    // 只在浏览器环境中初始化P2P传输
+    if (isBrowser) {
+      this.p2pTransfer = new P2PTransfer();
+    }
     this.useP2P = true;
     this.signalServer = null; // 信令服务器URL
   }
@@ -322,8 +356,13 @@ class FileTransferManager {
 
   // 发送文件（自动降级）
   async sendFile(file, recipientId) {
+    if (!isBrowser) {
+      // 直接使用服务器传输
+      return await this.fallbackToServerTransfer(file);
+    }
+    
     try {
-      if (this.useP2P && this.p2pTransfer.isWebRTCSupported()) {
+      if (this.useP2P && this.p2pTransfer && this.p2pTransfer.isWebRTCSupported()) {
         console.log('尝试使用P2P传输...');
         
         // 设置回调
@@ -385,8 +424,12 @@ class FileTransferManager {
 
   // 接收文件
   async receiveFile(offer) {
+    if (!isBrowser) {
+      throw new Error('File reception only works in browser environment');
+    }
+    
     try {
-      if (this.useP2P && this.p2pTransfer.isWebRTCSupported()) {
+      if (this.useP2P && this.p2pTransfer && this.p2pTransfer.isWebRTCSupported()) {
         console.log('准备接收P2P文件...');
         
         // 设置回调
@@ -418,7 +461,9 @@ class FileTransferManager {
 
   // 关闭连接
   close() {
-    this.p2pTransfer.close();
+    if (isBrowser && this.p2pTransfer) {
+      this.p2pTransfer.close();
+    }
   }
 }
 

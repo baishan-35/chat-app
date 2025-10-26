@@ -1,5 +1,7 @@
-// FileUploader.tsx
+'use client';
+
 import React, { useState, useRef, useCallback } from 'react';
+import MediaPreview from './MediaPreview';
 
 interface FileUploaderProps {
   onFileUpload: (file: File) => Promise<void>;
@@ -19,6 +21,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false); // 华为浏览器预览优化
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 验证文件
@@ -173,12 +176,20 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         
         {previewUrl ? (
           <div className="flex flex-col items-center">
-            <img 
-              src={previewUrl} 
-              alt="预览" 
-              className="max-h-48 max-w-full object-contain mb-2"
-            />
-            <p className="text-sm text-gray-500">{selectedFile?.name}</p>
+            <div className="relative">
+              <img 
+                src={previewUrl} 
+                alt="预览" 
+                className="max-h-48 max-w-full object-contain mb-2 media-preview huawei-browser-fix"
+                onClick={() => {
+                  // 华为浏览器优化：点击图片显示全屏预览
+                  if (navigator.userAgent.includes('HuaweiBrowser')) {
+                    setShowPreview(true);
+                  }
+                }}
+              />
+              <p className="text-sm text-gray-500">{selectedFile?.name}</p>
+            </div>
           </div>
         ) : selectedFile ? (
           <div className="flex flex-col items-center">
@@ -243,6 +254,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         <div className="mt-2 text-red-500 text-sm">
           {error}
         </div>
+      )}
+      
+      {/* 华为浏览器媒体预览 */}
+      {showPreview && selectedFile && (
+        <MediaPreview 
+          file={selectedFile} 
+          onClose={() => setShowPreview(false)} 
+        />
       )}
     </div>
   );

@@ -1,21 +1,45 @@
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-})
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
+  trailingSlash: false, // 设置为false以避免与Vercel重写规则冲突
+  images: {
+    unoptimized: process.env.NODE_ENV === 'production',
+    domains: ['your-domain.vercel.app'],
+  },
+  experimental: {
+    optimizeCss: true,
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   reactStrictMode: true,
   swcMinify: true,
-  // 配置API代理 - 从环境变量获取API URL
+  
+  // 添加API代理配置
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     return [
       {
         source: '/api/:path*',
-        destination: `${apiUrl}/api/:path*`
+        destination: '/api/:path*'
       }
-    ]
+    ];
   }
 }
 
-module.exports = withBundleAnalyzer(nextConfig)
+// 只有在非Vercel环境中才使用PWA
+if (process.env.VERCEL) {
+  module.exports = nextConfig;
+} else {
+  const withPWA = require('next-pwa')({
+    dest: 'public',
+    disable: process.env.NODE_ENV === 'development',
+    register: true,
+    skipWaiting: true,
+    // 华为设备优化
+    cacheStartUrl: true,
+    dynamicStartUrl: false,
+    dynamicStartUrlRedirect: '/',
+  });
+  
+  module.exports = withPWA(nextConfig);
+}

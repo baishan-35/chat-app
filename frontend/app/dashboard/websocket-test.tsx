@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
-import websocket from '@/lib/websocket';
+import { useWebSocket } from '@/lib/websocket';
 
 export default function WebSocketTestPage() {
   const { accessToken: token } = useAuthStore();
   const [messages, setMessages] = useState<any[]>([]);
-  const wsHook: any = websocket.useWebSocket(token || '');
+  const wsHook = useWebSocket(token || '');
 
   // 监听WebSocket消息
   useEffect(() => {

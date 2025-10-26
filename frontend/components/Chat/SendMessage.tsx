@@ -33,6 +33,31 @@ export default function SendMessage({ onSendMessage }: SendMessageProps) {
     }
   }, [inputMessage]);
 
+  // 处理华为浏览器特有问题
+  const handleInputFocus = () => {
+    // 延迟滚动以确保键盘完全弹出
+    setTimeout(() => {
+      const element = document.querySelector('.chat-input-container');
+      if (element) {
+        // 华为浏览器特有修复：使用不同的滚动策略
+        if (navigator.userAgent.includes('HuaweiBrowser')) {
+          // 华为浏览器使用scrollIntoViewOptions
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+        } else {
+          // 其他浏览器使用默认策略
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // 添加华为特有类名以应用特定样式
+        element.classList.add('huawei-input-fix');
+      }
+    }, 300);
+  };
+
   const handleSendMessage = () => {
     if (!inputMessage.trim() || !isConnected || !user) {
       return;
@@ -71,26 +96,27 @@ export default function SendMessage({ onSendMessage }: SendMessageProps) {
   };
 
   return (
-    <div className="border-t border-gray-200 p-4 bg-white">
-      <div className="flex items-end space-x-2">
+    <div className="border-t border-gray-200 p-4 bg-white safe-area-inset-bottom huawei-compat">
+      <div className="flex items-end space-x-2 chat-input-container huawei-browser-fix keyboard-adjustment">
         <textarea
           ref={textareaRef}
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
+          onFocus={handleInputFocus}
           onKeyPress={handleKeyPress}
           placeholder="输入消息..."
-          className="flex-1 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none min-h-[40px] max-h-[120px]"
+          className="flex-1 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none min-h-[40px] max-h-[120px] touch-target"
           rows={1}
           disabled={!isConnected}
         />
         <button
           onClick={handleSendMessage}
           disabled={!inputMessage.trim() || !isConnected}
-          className={`inline-flex items-center justify-center h-10 w-10 rounded-full ${
+          className={`inline-flex items-center justify-center h-11 w-11 rounded-full ${
             inputMessage.trim() && isConnected
               ? 'bg-indigo-600 text-white hover:bg-indigo-700'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          } transition-colors duration-200`}
+          } transition-colors duration-200 touch-target`}
           aria-label="发送消息"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

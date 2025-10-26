@@ -41,9 +41,29 @@ export default function LoginPage() {
         body: JSON.stringify(data),
       });
 
+      // 检查响应状态
+      if (!response.ok) {
+        // 尝试解析错误响应
+        try {
+          const errorResult = await response.json();
+          throw new Error(errorResult.message || `HTTP错误: ${response.status}`);
+        } catch (e) {
+          // 如果无法解析JSON，则使用状态文本
+          throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+        }
+      }
+
+      // 检查响应内容类型
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        throw new Error(`服务器返回非JSON响应: ${text.substring(0, 100)}${text.length > 100 ? '...' : ''}`);
+      }
+
       const result = await response.json();
 
-      if (!response.ok) {
+      // 检查业务逻辑是否成功
+      if (!result.success) {
         throw new Error(result.message || "登录失败");
       }
 
@@ -57,6 +77,7 @@ export default function LoginPage() {
       // 跳转到主页
       router.push("/dashboard");
     } catch (err: any) {
+      console.error("登录错误:", err);
       setError(err.message || "登录过程中发生错误");
     } finally {
       setIsLoading(false);

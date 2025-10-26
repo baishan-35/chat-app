@@ -8,14 +8,16 @@ export default function DebugPage() {
   const [debugInfo, setDebugInfo] = useState<any>(null);
 
   useEffect(() => {
-    // 获取localStorage中的认证信息
-    const authStorage = localStorage.getItem("auth-storage");
-    if (authStorage) {
-      try {
-        const parsed = JSON.parse(authStorage);
-        setDebugInfo(parsed);
-      } catch (error) {
-        setDebugInfo({ error: "无法解析存储的认证信息" });
+    // 安全地获取localStorage中的认证信息
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const authStorage = localStorage.getItem("auth-storage");
+      if (authStorage) {
+        try {
+          const parsed = JSON.parse(authStorage);
+          setDebugInfo(parsed);
+        } catch (error) {
+          setDebugInfo({ error: "无法解析存储的认证信息" });
+        }
       }
     }
   }, []);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useWebSocket } from "@/lib/websocket";
+import { useWebSocket } from "@/lib/websocket"; // 修复导入路径
 import { useAuthStore } from "@/stores/useAuthStore";
 import MessageList from "./MessageList";
 import SendMessage from "./SendMessage";
@@ -11,9 +11,9 @@ export default function ChatContainer() {
   const { isConnected, isConnecting, error } = useWebSocket(accessToken);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-200px)] bg-white shadow sm:rounded-lg">
+    <div className="flex flex-col h-[calc(100vh-200px)] bg-white shadow sm:rounded-lg safe-area-inset-bottom">
       {/* 聊天头部 */}
-      <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
+      <div className="px-4 py-3 border-b border-gray-200 sm:px-6 safe-area-inset-bottom">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-gray-900">聊天室</h2>
           <div className="flex items-center">

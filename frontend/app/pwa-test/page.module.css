@@ -1,0 +1,175 @@
+/* pwa-test/page.module.css */
+/* PWA测试页面样式 */
+
+.container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 1rem;
+}
+
+.header {
+  max-width: 48rem;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  font-size: 1rem;
+  color: #4b5563;
+}
+
+.content {
+  max-width: 48rem;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+}
+
+.testSection {
+  margin-bottom: 2rem;
+}
+
+.testSection:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.testGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .testGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.testItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+.testLabel {
+  font-weight: 500;
+  color: #374151;
+}
+
+.testValue {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.testButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 1.5rem;
+  min-height: 44px; /* 触摸目标优化 */
+}
+
+.testButton:hover {
+  background-color: #4338ca;
+}
+
+.installGuide {
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.guideTitle {
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 0.5rem;
+}
+
+.guideList {
+  color: #1e3a8a;
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.guideList li {
+  margin-bottom: 0.5rem;
+}
+
+.guideList li:last-child {
+  margin-bottom: 0;
+}
+
+.huaweiTests {
+  margin-bottom: 1.5rem;
+}
+
+.huaweiGuide {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.footer {
+  max-width: 48rem;
+  margin: 2rem auto 0;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  padding: 1rem;
+}
+
+/* 华为设备特定优化 */
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+  }
+  
+  .content {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .testItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .testValue {
+    align-self: flex-end;
+  }
+}

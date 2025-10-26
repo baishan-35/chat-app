@@ -16,6 +16,7 @@ interface MessageState {
   messages: Message[];
   addMessage: (message: Message) => void;
   updateMessageStatus: (id: string, status: 'sending' | 'sent' | 'delivered' | 'read') => void;
+  removeMessage: (id: string) => void;
   clearMessages: () => void;
   loadMessages: (messages: Message[]) => void;
 }
@@ -39,6 +40,13 @@ export const useMessageStore = create<MessageState>()(
           messages: state.messages.map((msg) => 
             msg.id === id ? { ...msg, status } : msg
           )
+        }));
+      },
+      
+      // 删除消息
+      removeMessage: (id) => {
+        set((state) => ({
+          messages: state.messages.filter((msg) => msg.id !== id)
         }));
       },
       

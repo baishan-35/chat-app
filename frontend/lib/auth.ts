@@ -3,7 +3,12 @@ import { nanoid } from "nanoid";
 
 // JWT密钥（从环境变量获取，生产环境必须设置）
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "default_secret_key_for_development"
+  process.env.JWT_SECRET || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET 环境变量在生产环境中必须设置');
+    }
+    return 'default_secret_key_for_development_only_for_testing';
+  })()
 );
 
 // Token过期时间（24小时）
