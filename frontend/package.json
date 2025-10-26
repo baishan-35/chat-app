@@ -21,6 +21,7 @@
     "@next/bundle-analyzer": "^16.0.0",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.0",
+    "canvas": "^3.2.0",
     "critters": "^0.0.23",
     "jose": "^4.14.4",
     "nanoid": "^5.1.6",

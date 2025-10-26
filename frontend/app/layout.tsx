@@ -47,9 +47,9 @@ export default function RootLayout({
         <meta name="huawei-webapp-capable" content="yes" />
         <meta name="huawei-webapp-status-bar-style" content="black-translucent" />
         
-        {/* <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="shortcut icon" href="/favicon.ico" /> */}
+        <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body>
         {children}
