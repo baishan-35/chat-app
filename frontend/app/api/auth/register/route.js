@@ -9,31 +9,38 @@ const corsHeaders = {
 
 export async function POST(request) {
   try {
-    const { email, password, name } = await request.json()
+    // 获取请求体
+    const body = await request.json();
     
-    // 这里应该是你的注册逻辑
-    console.log('Register attempt:', email)
+    // 从环境变量获取后端URL
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3007';
     
-    // 模拟注册成功
-    if (email && password) {
-      return NextResponse.json({
-        success: true,
-        token: 'mock-jwt-token-for-vercel',
-        user: { id: Date.now(), email, name: name || 'New User' }
-      }, {
-        headers: corsHeaders
-      })
-    } else {
-      return NextResponse.json(
-        { success: false, error: 'Invalid registration data' },
-        { status: 400, headers: corsHeaders }
-      )
-    }
+    // 构造后端API URL
+    const backendApiUrl = `${backendUrl}/api/auth/register`;
+    
+    // 转发请求到后端服务器
+    const response = await fetch(backendApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    
+    // 获取后端响应
+    const data = await response.json();
+    
+    // 返回后端响应
+    return NextResponse.json(data, {
+      status: response.status,
+      headers: corsHeaders
+    });
   } catch (error) {
+    console.error('注册API错误:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, message: '服务器内部错误' },
       { status: 500, headers: corsHeaders }
-    )
+    );
   }
 }
 
