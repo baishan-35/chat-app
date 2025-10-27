@@ -1,54 +1,46 @@
-// app/api/auth/register/route.js
-// 注册API端点 - 代理到后端服务器
+import { NextResponse } from 'next/server'
 
 export async function POST(request) {
   try {
-    // 获取请求体
-    const body = await request.json();
+    const { email, password, name } = await request.json()
     
-    // 从环境变量获取后端URL
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3007';
+    // 这里应该是你的注册逻辑
+    console.log('Register attempt:', email)
     
-    // 构造后端API URL
-    const backendApiUrl = `${backendUrl}/api/auth/register`;
-    
-    // 转发请求到后端服务器
-    const response = await fetch(backendApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-    
-    // 获取后端响应
-    const data = await response.json();
-    const headers = new Headers(response.headers);
-    
-    // 返回后端响应
-    return new Response(
-      JSON.stringify(data),
-      {
-        status: response.status,
-        headers: {
-          'Content-Type': 'application/json',
-          ...Object.fromEntries(headers.entries())
-        }
-      }
-    );
+    // 模拟注册成功
+    if (email && password) {
+      return NextResponse.json({
+        success: true,
+        token: 'mock-jwt-token-for-vercel',
+        user: { id: Date.now(), email, name: name || 'New User' }
+      })
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Invalid registration data' },
+        { status: 400 }
+      )
+    }
   } catch (error) {
-    console.error('注册API错误:', error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        message: '服务器内部错误'
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    )
   }
+}
+
+// 明确声明支持的HTTP方法
+export async function GET() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
+}
+
+export async function PUT() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
+}
+
+export async function DELETE() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
+}
+
+export async function PATCH() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
 }
