@@ -6,16 +6,6 @@
       "use": "@vercel/next"
     }
   ],
-  "rewrites": [
-    {
-      "source": "/api/auth/login",
-      "destination": "${BACKEND_URL}/api/auth/login"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "${BACKEND_URL}/api/:path*"
-    }
-  ],
   "env": {
     "NODE_ENV": "production",
     "BACKEND_URL": "https://your-backend-url.com"
