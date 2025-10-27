@@ -1,6 +1,11 @@
 // app/not-found.tsx
 import type { Metadata } from 'next'
 
+export const metadata: Metadata = {
+  title: '页面未找到 - 私密聊天',
+  description: '抱歉，您访问的页面不存在',
+}
+
 export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -16,8 +21,4 @@ export default function NotFound() {
       </div>
     </div>
   )
-}
-
-export const metadata = {
-  title: '页面未找到 - 私密聊天',
 }

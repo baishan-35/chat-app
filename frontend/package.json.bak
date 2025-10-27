@@ -14,23 +14,23 @@
     "vercelcheck": "node scripts/vercel-deploy-check.js",
     "runtimecheck": "node scripts/runtime-error-prevention.js",
     "artifactcheck": "node scripts/build-artifact-analysis.js",
-    "verceldiag": "node scripts/vercel-build-diagnostic.js",
-    "vercelconfig": "node scripts/vercel-config-check.js"
+    "verceldiag": "node scripts/vercel-build-diagnostic.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.1.0",
     "@next/bundle-analyzer": "^16.0.0",
+    "@next/swc-win32-x64-msvc": "^16.0.0",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.0",
     "canvas": "^3.2.0",
     "critters": "^0.0.23",
     "jose": "^4.14.4",
     "nanoid": "^5.1.6",
-    "next": "14.2.3",
+    "next": "^14.2.33",
     "next-pwa": "^5.6.0",
     "postcss": "^8.4.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-hook-form": "^7.44.3",
     "react-swipeable": "^7.0.2",
     "tailwindcss": "^3.3.0",
@@ -39,11 +39,9 @@
     "zustand": "^4.4.1"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^16.0.0",
     "@types/node": "^20.0.0",
-    "@types/react": "18.3.1",
-    "@types/react-dom": "18.3.1",
-    "eslint": "^9.38.0",
-    "typescript": "5.4.5"
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
   }
 }

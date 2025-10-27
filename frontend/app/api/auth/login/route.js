@@ -12,8 +12,16 @@ export async function POST(request) {
     // 获取请求体
     const body = await request.json();
     
-    // 从环境变量获取后端URL
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3007';
+    // 从环境变量获取后端URL，生产环境必须通过环境变量配置
+    const backendUrl = process.env.BACKEND_URL;
+    
+    // 如果没有配置后端URL，返回错误
+    if (!backendUrl) {
+      return NextResponse.json(
+        { success: false, message: '后端服务URL未配置' },
+        { status: 500, headers: corsHeaders }
+      );
+    }
     
     // 构造后端API URL
     const backendApiUrl = `${backendUrl}/api/auth/login`;
