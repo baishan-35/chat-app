@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server'
 
+// 处理CORS头
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+}
+
 export async function POST(request) {
   try {
     const { email, password, name } = await request.json()
@@ -13,19 +20,26 @@ export async function POST(request) {
         success: true,
         token: 'mock-jwt-token-for-vercel',
         user: { id: Date.now(), email, name: name || 'New User' }
+      }, {
+        headers: corsHeaders
       })
     } else {
       return NextResponse.json(
         { success: false, error: 'Invalid registration data' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
   } catch (error) {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     )
   }
+}
+
+// 处理OPTIONS请求（预检请求）
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders })
 }
 
 // 明确声明支持的HTTP方法

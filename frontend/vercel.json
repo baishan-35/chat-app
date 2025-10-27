@@ -8,6 +8,8 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "BACKEND_URL": "https://your-backend-url.com"
+    "BACKEND_URL": "https://your-backend-url.com",
+    "NEXT_PUBLIC_API_URL": "https://your-app.vercel.app",
+    "NEXT_PUBLIC_WS_URL": "wss://your-app.vercel.app"
   }
 }
