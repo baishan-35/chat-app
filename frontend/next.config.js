@@ -34,6 +34,25 @@ const nextConfig = {
         }
       ];
     }
+  },
+  
+  // 添加静态资源路由保护
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Content-Type', value: 'application/manifest+json' },
+        ],
+      },
+    ]
   }
 }
 
