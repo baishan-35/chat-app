@@ -6,15 +6,14 @@
       "use": "@vercel/next"
     }
   ],
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "${BACKEND_URL}/api/:path*"
+      "src": "/api/auth/login",
+      "dest": "${BACKEND_URL}/api/auth/login"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "${BACKEND_URL}/api/$1"
     }
   ],
   "env": {
