@@ -21,7 +21,7 @@ try {
 }
 
 const app = express();
-const PORT = 3007; // 更改端口为3007
+const PORT = 3011; // 更改端口为3011
 
 // 创建上传目录
 const uploadDir = path.join(__dirname, 'uploads');
@@ -39,6 +39,14 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// 添加请求日志中间件
+app.use((req, res, next) => {
+  console.log('收到请求:', req.method, req.url);
+  console.log('请求头:', req.headers);
+  console.log('原始请求体:', req.rawBody);
+  next();
+});
 
 // 静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

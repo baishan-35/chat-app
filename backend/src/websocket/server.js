@@ -1,10 +1,19 @@
 const WebSocket = require('ws');
 const url = require('url');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
 const { v4: uuidv4 } = require('uuid');
 
-const prisma = new PrismaClient();
+// 延迟加载Prisma客户端
+let prisma;
+let databaseAvailable = true;
+
+try {
+  const { PrismaClient } = require('@prisma/client');
+  prisma = new PrismaClient();
+} catch (error) {
+  console.log('数据库不可用，使用模拟模式');
+  databaseAvailable = false;
+}
 
 // 存储所有活跃的WebSocket连接
 const clients = new Map();
@@ -13,7 +22,7 @@ const clients = new Map();
 const messageHistory = [];
 
 // WebSocket服务器配置
-const WS_PORT = 3001; // WebSocket服务器端口改为3001
+const WS_PORT = 3010; // WebSocket服务器端口改为3010
 const HEARTBEAT_INTERVAL = 30000; // 心跳检测间隔(毫秒)
 const MAX_HISTORY = 100; // 最大消息历史数量
 
