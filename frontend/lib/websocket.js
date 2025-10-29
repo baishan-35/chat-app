@@ -24,6 +24,16 @@ export function useWebSocket(token) {
    * 建立WebSocket连接
    */
   const connect = () => {
+    // 检查是否在Vercel环境中
+    const isVercel = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production';
+    
+    // 如果在Vercel环境中，不尝试WebSocket连接
+    if (isVercel) {
+      console.log('在Vercel环境中，使用轮询替代WebSocket');
+      setError('在Vercel环境中使用轮询替代WebSocket');
+      return;
+    }
+
     // 如果已经连接或正在连接，则不执行任何操作
     if (isConnected || isConnecting) return;
 
@@ -47,7 +57,16 @@ export function useWebSocket(token) {
       }
       
       // 创建WebSocket连接
-      const ws = new WebSocket(`${wsUrl}/api/ws?token=${token}`);
+      // 如果wsUrl包含端口信息，直接使用；否则添加/api/ws路径
+      let fullWsUrl;
+      if (wsUrl.includes('://')) {
+        // 如果是完整的URL（包含协议），直接使用
+        fullWsUrl = `${wsUrl}?token=${token}`;
+      } else {
+        // 否则添加路径
+        fullWsUrl = `${wsUrl}/api/ws?token=${token}`;
+      }
+      const ws = new WebSocket(fullWsUrl);
       wsRef.current = ws;
 
       // 连接成功

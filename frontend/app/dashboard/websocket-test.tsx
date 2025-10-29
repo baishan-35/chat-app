@@ -22,8 +22,8 @@ export default function WebSocketTestPage() {
   }, []);
 
   const handleSendMessage = () => {
-    if (typeof wsHook.sendMessage === 'function') {
-      wsHook.sendMessage({
+    if (wsHook && 'sendMessage' in wsHook && typeof (wsHook as any).sendMessage === 'function') {
+      (wsHook as any).sendMessage({
         type: 'test_message',
         data: {
           text: 'Hello from client',
@@ -34,8 +34,8 @@ export default function WebSocketTestPage() {
   };
 
   const handleSendHeartbeat = () => {
-    if (typeof wsHook.sendMessage === 'function') {
-      wsHook.sendMessage({
+    if (wsHook && 'sendMessage' in wsHook && typeof (wsHook as any).sendMessage === 'function') {
+      (wsHook as any).sendMessage({
         type: 'heartbeat'
       });
     }
@@ -47,18 +47,18 @@ export default function WebSocketTestPage() {
       
       <div className="mb-6 p-4 border rounded">
         <h2 className="text-xl font-semibold mb-2">连接状态</h2>
-        <p>连接状态: {wsHook.isConnected ? '已连接' : wsHook.isConnecting ? '连接中...' : '未连接'}</p>
-        <p>错误信息: {wsHook.error || '无'}</p>
+        <p>连接状态: {(wsHook as any).isConnected ? '已连接' : (wsHook as any).isConnecting ? '连接中...' : '未连接'}</p>
+        <p>错误信息: {(wsHook as any).error || '无'}</p>
         <button 
           onClick={handleSendMessage}
-          disabled={!wsHook.isConnected}
+          disabled={!(wsHook as any).isConnected}
           className="mt-2 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
         >
           发送测试消息
         </button>
         <button 
           onClick={handleSendHeartbeat}
-          disabled={!wsHook.isConnected}
+          disabled={!(wsHook as any).isConnected}
           className="mt-2 ml-2 px-4 py-2 bg-green-500 text-white rounded disabled:bg-gray-400"
         >
           发送心跳
